@@ -63,17 +63,18 @@ workflow sipros {
     row
 
     main:
+    //set up per-file data as value channels
     row_channel = channel.value(row)
-
     ft_files = sipros_convert_raw_file(row_channel)
         | collect
 
+    //run searches at each % RIA step
     config_files = sipros_config_generator(row_channel)
         | flatten
-
     search_results = sipros_search(config_files, ft_files, row_channel)
         | collect
     
+    //do post-processing
     processed_results = 
 
     emit:
