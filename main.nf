@@ -139,14 +139,13 @@ workflow sipros {
 
     main:
     //set up per-file data as value channels
-    row_channel = channel.value(row)
     config_file = channel.value(file(row.sipros_config))
     rawfile = channel.value(file(row.raw_file))
     ft_files = sipros_convert_raw_file(raw_file)
         | collect
 
     //run searches at each % RIA step
-    config_files = sipros_config_generator(row_channel, config_file)
+    config_files = sipros_config_generator(row, config_file)
         | flatten
     search_results = sipros_search(config_files, ft_files)
         | collect
@@ -155,7 +154,7 @@ workflow sipros {
     processed_results = sipros_PSM_filter(config_file, search_results)
         | sipros_protein_filter
         | sipros_abundance_cluster
-        | combine(row_channel)
+        | combine(row)
         | sipros_protein_FDR
         | sipros_SIP_abundance
 
