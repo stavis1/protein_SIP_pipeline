@@ -15,7 +15,7 @@ process sipros_config_generator {
 
     script:
     """
-    conda run -n sipros_env python configGenerator -i $config_file -o ./ -e $row.label_elm
+    conda run -n sipros_env configGenerator -i $config_file -o ./ -e $row.label_elm
     """
 }
 
