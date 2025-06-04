@@ -7,7 +7,8 @@ process sipros_config_generator {
     // publishDir params.results_dir, mode: 'copy'
 
     input:
-    tuple val(row), path(config_file)
+    val row
+    path config_file
 
     output:
     path '*.cfg'
@@ -40,7 +41,8 @@ process sipros_search {
     label 'sipros_large'    
 
     input:
-    tuple path(config_file), path(ft_files)
+    path config_file
+    path ft_files
 
     output:
     path 'sip/'
@@ -57,7 +59,8 @@ process sipros_PSM_filter {
     label 'sipros_small'
 
     input:
-    tuple path(config_file), path(sipfiles)
+    path config_file 
+    path sipfiles
 
     output:
     tuple path(config_file), path('sip/')
@@ -139,8 +142,8 @@ workflow sipros {
 
     main:
     //set up per-file data as value channels
-    config_file = channel.value(file(row.sipros_config))
-    rawfile = channel.value(file(row.raw_file))
+    config_file = row.map {r -> file(r.sipros_config)}
+    raw_file = row.map {r -> file(r.raw_file)}
     ft_files = sipros_convert_raw_file(raw_file)
         | collect
 
@@ -159,7 +162,7 @@ workflow sipros {
         | sipros_SIP_abundance
 
     emit:
-    processed_results.out
+    processed_results
 }
 
 workflow {
