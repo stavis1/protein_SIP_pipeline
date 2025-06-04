@@ -3,6 +3,7 @@ params.results_dir = "$launchDir/results"
 
 process sipros_config_generator {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_small'
     // publishDir params.results_dir, mode: 'copy'
 
     input:
@@ -19,6 +20,7 @@ process sipros_config_generator {
 
 process sipros_convert_raw_file {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_med'
 
     input:
     path rawfile
@@ -29,12 +31,13 @@ process sipros_convert_raw_file {
     script:
     //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
     """
-    conda run -n sipros_env mono /opt/conda/envs/sipros_env/bin/Raxport.exe -i ./ -o ./ -j 2
+    conda run -n sipros_env mono /opt/conda/envs/sipros_env/bin/Raxport.exe -i ./ -o ./ -j 3
     """
 }
 
 process sipros_search {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_large'    
 
     input:
     tuple path(config_file), path(ft_files)
@@ -51,6 +54,7 @@ process sipros_search {
 
 process sipros_PSM_filter {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_small'
 
     input:
     tuple path(config_file), path(sipfiles)
@@ -66,6 +70,7 @@ process sipros_PSM_filter {
 
 process sipros_protein_filter {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_small'
 
     input:
     tuple path(config_file), path(sipfiles)
@@ -81,6 +86,7 @@ process sipros_protein_filter {
 
 process sipros_abundance_cluster {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_small'
 
     input:
     tuple path(config_file), path(sipfiles)
@@ -96,6 +102,7 @@ process sipros_abundance_cluster {
 
 process sipros_protein_FDR {
     container 'stavisvols/psp_sipros:latest'
+    label 'sipros_small'
 
     input:
     tuple path(sipfiles), val(row)
@@ -112,6 +119,7 @@ process sipros_protein_FDR {
 process sipros_SIP_abundance {
     container 'stavisvols/psp_sipros:latest'
     publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "sip/*.*[!sip]"
+    label 'sipros_med'
 
     input:
     tuple path(sipfiles), val(row)
