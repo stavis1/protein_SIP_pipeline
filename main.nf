@@ -1,28 +1,27 @@
 params.results_dir = "$launchDir/results"
+//required columns in design file : sample_ID, label_elm, raw_file, sipros_config
 
 process sipros_config_generator {
     container 'stavisvols/psp_sipros:latest'
-    containerOptions "--bind $launchDir:/data/"
-    publishDir params.results_dir, mode: 'copy'
+    // publishDir params.results_dir, mode: 'copy'
 
     input:
-    val row
+    tuple val(row), path(config_file)
 
     output:
     path '*.cfg'
 
     script:
     """
-    conda run -n sipros_env python configGenerator -i $row.sipros_config -o ./ -e $row.label_elm
+    conda run -n sipros_env python configGenerator -i $config_file -o ./ -e $row.label_elm
     """
 }
 
 process sipros_convert_raw_file {
     container 'stavisvols/psp_sipros:latest'
-    containerOptions "--bind $launchDir:/data/"
 
     input:
-    val row
+    path rawfile
 
     output:
     path '*.FT{1,2}'
@@ -30,32 +29,100 @@ process sipros_convert_raw_file {
     script:
     //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
     """
-    conda run -n sipros_env mono /opt/conda/envs/sipros_env/bin/Raxport.exe -i ./ -o ./
+    conda run -n sipros_env mono /opt/conda/envs/sipros_env/bin/Raxport.exe -i ./ -o ./ -j 2
     """
 }
 
 process sipros_search {
     container 'stavisvols/psp_sipros:latest'
-    containerOptions "--bind $launchDir:/data/"
 
     input:
-    tuple path(congif_file), path(ft_files), val(row)
+    tuple path(config_file), path(ft_files)
 
     output:
-    path '*.sip'
+    path 'sip/'
 
     script:
     """
-    conda run -n sipros_env 
+    mkdir sip
+    conda run -n sipros_env SiprosV4OMP -f *.FT2 -c $config_file -o sip/
     """
 }
 
-process sipros_to_ipm{
+process sipros_PSM_filter {
+    container 'stavisvols/psp_sipros:latest'
 
+    input:
+    tuple path(config_file), path(sipfiles)
+
+    output:
+    tuple path(config_file), path('sip/')
+
+    script:
+    """
+    conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/sipros_peptides_filtering.py -c $config_file -w sip/
+    """
 }
 
-process ipm_parse_data{
+process sipros_protein_filter {
+    container 'stavisvols/psp_sipros:latest'
 
+    input:
+    tuple path(config_file), path(sipfiles)
+
+    output:
+    tuple path(config_file), path('sip/')
+
+    script:
+    """
+    conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/sipros_peptides_assembling.py -c $config_file -w sip/
+    """
+}
+
+process sipros_abundance_cluster {
+    container 'stavisvols/psp_sipros:latest'
+
+    input:
+    tuple path(config_file), path(sipfiles)
+
+    output:
+    path 'sip/'
+
+    script:
+    """
+    conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/ClusterSip.py -c $config_file -w sip/
+    """
+}
+
+process sipros_protein_FDR {
+    container 'stavisvols/psp_sipros:latest'
+
+    input:
+    tuple path(sipfiles), val(row)
+
+    output:
+    tuple path('sip/'), val(row)
+
+    script:
+    """
+    conda run -n sipros_env Rscript /opt/conda/envs/sipros_env/V4Scripts/refineProteinFDR.R -pro sip/*.pro.txt -psm sip/*.psm.txt -fdr 0.01 -o sip/$row.sample_ID
+    """
+}
+
+process sipros_SIP_abundance {
+    container 'stavisvols/psp_sipros:latest'
+    publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "sip/*.*[!sip]"
+
+    input:
+    tuple path(sipfiles), val(row)
+
+    output:
+    tuple path('sip/'), val(row)
+
+    script:
+    """
+    conda run -n sipros_env Rscript /opt/conda/envs/sipros_env/V4Scripts/getLabelPCTinEachFT.R -pro sip/*.proRefineFDR.txt -psm sip/*.psm.txt -thr 3 -o sip/$row.sample_ID
+    """
 }
 
 workflow sipros {
@@ -65,20 +132,27 @@ workflow sipros {
     main:
     //set up per-file data as value channels
     row_channel = channel.value(row)
-    ft_files = sipros_convert_raw_file(row_channel)
+    config_file = channel.value(file(row.sipros_config))
+    rawfile = channel.value(file(row.raw_file))
+    ft_files = sipros_convert_raw_file(raw_file)
         | collect
 
     //run searches at each % RIA step
-    config_files = sipros_config_generator(row_channel)
+    config_files = sipros_config_generator(row_channel, config_file)
         | flatten
-    search_results = sipros_search(config_files, ft_files, row_channel)
+    search_results = sipros_search(config_files, ft_files)
         | collect
     
     //do post-processing
-    processed_results = 
+    processed_results = sipros_PSM_filter(config_file, search_results)
+        | sipros_protein_filter
+        | sipros_abundance_cluster
+        | combine(row_channel)
+        | sipros_protein_FDR
+        | sipros_SIP_abundance
 
     emit:
-    getLabelPCTinEachFT.out
+    processed_results.out
 }
 
 workflow {
@@ -91,9 +165,9 @@ workflow {
 
     //do per-file processing
     ipm_step_1 = sipros(design)
-        | sipros_to_ipm
-        | ipm_parse_data
-        | collect
+        // | sipros_to_ipm
+        // | ipm_parse_data
+        // | collect
     
     //run IPM classifier step
 
