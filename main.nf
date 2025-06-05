@@ -50,7 +50,7 @@ process sipros_search {
     script:
     """
     mkdir sip
-    conda run -n sipros_env SiprosV4OMP -f *.FT2 -c $config_file -o sip/
+    conda run -n sipros_env SiprosV4OMP -f ./ -c $config_file -o sip/
     """
 }
 
@@ -170,15 +170,11 @@ workflow {
     file(params.results_dir).mkdir()
     file(params.design).copyTo(params.results_dir)
 
-    //parse the design file
-    design = Channel.of(file(params.design)).splitCsv(header : true, sep : '\t', strip : true)
-
     //do per-file processing
-    ipm_step_1 = sipros(design)
-        // | sipros_to_ipm
-        // | ipm_parse_data
-        // | collect
-    
+    ipm_step_1 = Channel.of(file(params.design)).splitCsv(header : true, sep : '\t', strip : true)
+        | collate(1)
+        | sipros
+        
     //run IPM classifier step
 
     //run IPM fitting jobs
