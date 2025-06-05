@@ -7,15 +7,15 @@ process sipros_config_generator {
     // publishDir params.results_dir, mode: 'copy'
 
     input:
-    val row
-    path config_file
+    tuple val(row), path(global_config_file)
 
     output:
-    path '*.cfg'
+    tuple val(row.sample_ID), path('cfg/*.cfg'), path(global_config_file)
 
     script:
     """
-    conda run -n sipros_env configGenerator -i $config_file -o ./ -e $row.label_elm
+    mkdir cfg
+    conda run -n sipros_env configGenerator -i $global_config_file -o cfg/ -e $row.label_elm
     """
 }
 
@@ -24,10 +24,10 @@ process sipros_convert_raw_file {
     label 'sipros_med'
 
     input:
-    path rawfile
+    tuple val(row), path(rawfile)
 
     output:
-    path '*.FT{1,2}'
+    tuple val(row.sample_ID), path('*.FT{1,2}')
 
     script:
     //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
@@ -41,16 +41,14 @@ process sipros_search {
     label 'sipros_large'    
 
     input:
-    path config_file
-    path ft_files
+    tuple val(sample_ID), path(ft_files), path(label_config_file), path(global_config_file)
 
     output:
-    path 'sip/'
+    tuple val(sample_ID), path('*.sip'), path(global_config_file)
 
     script:
     """
-    mkdir sip
-    conda run -n sipros_env SiprosV4OMP -f ./ -c $config_file -o sip/
+    conda run -n sipros_env SiprosV4OMP -f ./ -c $label_config_file -o ./
     """
 }
 
@@ -59,14 +57,17 @@ process sipros_PSM_filter {
     label 'sipros_small'
 
     input:
-    path config_file 
-    path sipfiles
+    tuple path(config_file), path(sipfiles)
 
     output:
     tuple path(config_file), path('sip/')
 
     script:
     """
+    mkdir sip
+    cd sip
+    ln -s ../*.sip .
+    cd ../
     conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/sipros_peptides_filtering.py -c $config_file -w sip/
     """
 }
@@ -138,23 +139,23 @@ process sipros_SIP_abundance {
 
 workflow sipros {
     take:
-    row
+    rows
 
     main:
-    //set up per-file data as value channels
-    config_file = row.map {r -> file(r.sipros_config)}
-    raw_file = row.map {r -> file(r.raw_file)}
-    ft_files = sipros_convert_raw_file(raw_file)
-        | collect
+    //config file processing
+    config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
+        | sipros_config_generator
 
-    //run searches at each % RIA step
-    config_files = sipros_config_generator(row, config_file)
-        | flatten
-    search_results = sipros_search(config_files, ft_files)
-        | collect
-    
-    //do post-processing
-    processed_results = sipros_PSM_filter(config_file, search_results)
+    search_results = rows.map {r -> tuple(r, file(r.sipros_config))}
+        | sipros_convert_raw_file
+        //database searches are parallelized across config files
+        | cross(config_files)
+        | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
+        | sipros_search
+        | groupTuple(size = 100)
+        | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]}}
+        //post-processing
+        | sipros_PSM_filter
         | sipros_protein_filter
         | sipros_abundance_cluster
         | combine(row)
@@ -162,7 +163,7 @@ workflow sipros {
         | sipros_SIP_abundance
 
     emit:
-    processed_results
+    search_results
 }
 
 workflow {
@@ -170,14 +171,9 @@ workflow {
     file(params.results_dir).mkdir()
     file(params.design).copyTo(params.results_dir)
 
-    //do per-file processing
-    ipm_step_1 = Channel.of(file(params.design)).splitCsv(header : true, sep : '\t', strip : true)
-        | collate(1)
+    Channel.of(file(params.design)).splitCsv(header : true, sep : '\t', strip : true)
         | sipros
+        // | collect
+        // | isopacketModeler
         
-    //run IPM classifier step
-
-    //run IPM fitting jobs
-
-    //
 }
