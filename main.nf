@@ -153,7 +153,7 @@ workflow sipros {
         | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
         | sipros_search
         | groupTuple(size = 100)
-        | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]}}
+        | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]})}
         //post-processing
         | sipros_PSM_filter
         | sipros_protein_filter
