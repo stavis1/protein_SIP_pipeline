@@ -48,6 +48,7 @@ process sipros_search {
 
     script:
     """
+    export OMP_NUM_THREADS=4
     conda run -n sipros_env SiprosV4OMP -f ./ -c $label_config_file -o ./
     """
 }
@@ -145,20 +146,21 @@ workflow sipros {
     //config file processing
     config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
         | sipros_config_generator
+        | flatMap {r -> r[1].collect {f -> tuple(r[0], f, r[2])}}
 
-    search_results = rows.map {r -> tuple(r, file(r.sipros_config))}
+    search_results = rows.map {r -> tuple(r, file(r.raw_file))}
         | sipros_convert_raw_file
         //database searches are parallelized across config files
         | cross(config_files)
         | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
         | sipros_search
-        | groupTuple(size = 100)
+        | groupTuple(size: 100)
         | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]})}
         //post-processing
         | sipros_PSM_filter
         | sipros_protein_filter
         | sipros_abundance_cluster
-        | combine(row)
+        | combine(rows)
         | sipros_protein_FDR
         | sipros_SIP_abundance
 
