@@ -143,7 +143,8 @@ workflow sipros {
     rows
 
     main:
-    fasta_files = rows.map {r -> tuple(r.sample_ID, file(r.fasta))}
+    fasta_files = rows.map {r -> ['sample_ID':r.sample_ID, 'fasta':file(r.fasta)]}
+        | collect
 
     //config file processing
     config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
@@ -154,11 +155,9 @@ workflow sipros {
         | sipros_convert_raw_file
         //database searches are parallelized across config files
         | cross(config_files)
-        | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
-        | cross(fasta_files)
-        | map {data, fasta -> tuple(data[0], data[1], data[2], data[3], fasta[1])}
+        | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2], fasta.find {it.sample_ID == FT[0]}.fasta)}
         | sipros_search
-        | groupTuple(size: 100)
+        | groupTuple(size: 100, remainder: true)
         | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]})}
         //post-processing
         | sipros_PSM_filter
