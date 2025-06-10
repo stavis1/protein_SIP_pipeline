@@ -41,7 +41,7 @@ process sipros_search {
     label 'sipros_large'    
 
     input:
-    tuple val(sample_ID), path(ft_files), path(label_config_file), path(global_config_file)
+    tuple val(sample_ID), path(ft_files), path(label_config_file), path(global_config_file), path(fasta)
 
     output:
     tuple val(sample_ID), path('*.sip'), path(global_config_file)
@@ -49,7 +49,7 @@ process sipros_search {
     script:
     """
     export OMP_NUM_THREADS=4
-    conda run -n sipros_env SiprosV4OMP -f ./ -c $label_config_file -o ./
+    conda run -n sipros_env SiprosV4OMP -f ./*.FT2 -c $label_config_file -o ./
     """
 }
 
@@ -143,6 +143,8 @@ workflow sipros {
     rows
 
     main:
+    fasta_files = rows.map {r -> tuple(r.sample_ID, file(r.fasta))}
+
     //config file processing
     config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
         | sipros_config_generator
@@ -153,6 +155,8 @@ workflow sipros {
         //database searches are parallelized across config files
         | cross(config_files)
         | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
+        | cross(fasta_files)
+        | map {data, fasta -> tuple(data[0], data[1], data[2], data[3], fasta[1])}
         | sipros_search
         | groupTuple(size: 100)
         | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]})}
