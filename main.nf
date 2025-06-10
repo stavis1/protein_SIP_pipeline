@@ -143,19 +143,20 @@ workflow sipros {
     rows
 
     main:
-    fasta_files = rows.map {r -> ['sample_ID':r.sample_ID, 'fasta':file(r.fasta)]}
-        | collect
-
     //config file processing
     config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
         | sipros_config_generator
         | flatMap {r -> r[1].collect {f -> tuple(r[0], f, r[2])}}
 
-    search_results = rows.map {r -> tuple(r, file(r.raw_file))}
+    search_jobs = rows.map {r -> tuple(r, file(r.raw_file))}
         | sipros_convert_raw_file
         //database searches are parallelized across config files
         | cross(config_files)
-        | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2], fasta.find {it.sample_ID == FT[0]}.fasta)}
+        | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
+
+    fasta_files = rows.map {r -> ['sample_ID':r.sample_ID, 'fasta':file(r.fasta)]}
+        | cross(search_jobs)
+        | map {fasta, job -> tuple(job[0], job[1], job[2], job[3], fasta[1])}
         | sipros_search
         | groupTuple(size: 100, remainder: true)
         | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]})}
