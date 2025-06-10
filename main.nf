@@ -44,7 +44,7 @@ process sipros_search {
     tuple val(sample_ID), path(ft_files), path(label_config_file), path(global_config_file), path(fasta)
 
     output:
-    tuple val(sample_ID), path('*.sip'), path(global_config_file)
+    tuple val(sample_ID), path('*.sip'), path(global_config_file), path(fasta)
 
     script:
     """
@@ -58,10 +58,10 @@ process sipros_PSM_filter {
     label 'sipros_small'
 
     input:
-    tuple path(config_file), path(sipfiles)
+    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
 
     output:
-    tuple path(config_file), path('sip/')
+    tuple val(sample_ID), path(config_file), path('sip/'), path(fasta)
 
     script:
     """
@@ -78,10 +78,10 @@ process sipros_protein_filter {
     label 'sipros_small'
 
     input:
-    tuple path(config_file), path(sipfiles)
+    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
 
     output:
-    tuple path(config_file), path('sip/')
+    tuple val(sample_ID), path(config_file), path('sip/'), path(fasta)
 
     script:
     """
@@ -94,10 +94,10 @@ process sipros_abundance_cluster {
     label 'sipros_small'
 
     input:
-    tuple path(config_file), path(sipfiles)
+    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
 
     output:
-    path 'sip/'
+    tuple val(sample_ID), path('sip/'), path(fasta)
 
     script:
     """
@@ -110,10 +110,10 @@ process sipros_protein_FDR {
     label 'sipros_small'
 
     input:
-    tuple path(sipfiles), val(row)
+    tuple path(sipfiles), path(fasta), val(row)
 
     output:
-    tuple path('sip/'), val(row)
+    tuple path('sip/'), path(fasta), val(row)
 
     script:
     """
@@ -127,10 +127,10 @@ process sipros_SIP_abundance {
     label 'sipros_med'
 
     input:
-    tuple path(sipfiles), val(row)
+    tuple path(sipfiles), path(fasta), val(row)
 
     output:
-    tuple path('sip/'), val(row)
+    tuple path('sip/'), path(fasta), val(row)
 
     script:
     """
@@ -144,6 +144,8 @@ workflow sipros {
 
     main:
     //config file processing
+    indexed_rows = rows.map {r -> tuple(r.sample_ID, r)}
+
     config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
         | sipros_config_generator
         | flatMap {r -> r[1].collect {f -> tuple(r[0], f, r[2])}}
@@ -154,17 +156,18 @@ workflow sipros {
         | cross(config_files)
         | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
 
-    fasta_files = rows.map {r -> ['sample_ID':r.sample_ID, 'fasta':file(r.fasta)]}
+    search_results = rows.map {r -> tuple(r.sample_ID, file(r.fasta))}
         | cross(search_jobs)
         | map {fasta, job -> tuple(job[0], job[1], job[2], job[3], fasta[1])}
         | sipros_search
         | groupTuple(size: 100, remainder: true)
-        | map {k,v -> tuple(v[0][0], v[1].collect {e -> e[1]})}
+        | map {key, sips, configs, fastas -> tuple(configs[0], sips, fastas[0])}
         //post-processing
         | sipros_PSM_filter
         | sipros_protein_filter
         | sipros_abundance_cluster
-        | combine(rows)
+        | cross(indexed_rows)
+        | map {abund, row -> tuple(abund[1], abund[2], row[1])}
         | sipros_protein_FDR
         | sipros_SIP_abundance
 
@@ -181,5 +184,5 @@ workflow {
         | sipros
         // | collect
         // | isopacketModeler
-        
+
 }
