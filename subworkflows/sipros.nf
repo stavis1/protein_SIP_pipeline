@@ -162,7 +162,7 @@ workflow sipros {
         | cross(search_jobs)
         | map {fasta, job -> tuple(job[0], job[1], job[2], job[3], fasta[1])}
         | search
-        | groupTuple(size: 100, remainder: true)
+        | groupTuple(size: 101, remainder: true)
         | map {key, sips, configs, fastas -> tuple(key, configs[0], sips, fastas[0])}
         //post-processing
         | psm_filter
