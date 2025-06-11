@@ -132,7 +132,7 @@ process sip_abundance {
     tuple path(sipfiles), path(fasta), val(row)
 
     output:
-    tuple path('sip/*.txt'), path(fasta), val(row)
+    tuple val(row), path('sip/*.txt') 
 
     script:
     """

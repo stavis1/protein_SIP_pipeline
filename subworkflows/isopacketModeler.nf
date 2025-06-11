@@ -1,15 +1,4 @@
 
-workflow sipros_to_ipm {
-    take:
-    samples //tuple(rows, sipros_results)
-
-    main:
-    psms = sipros_psm_converter(samples)
-
-    emit:
-    psms
-}
-
 process sipros_psm_converter {
     container 'stavisvols/psp_isopacketmodeler'
     label 'ipm_small'
@@ -159,6 +148,17 @@ process merge_results {
     """
 }
 
+
+workflow sipros_to_ipm {
+    take:
+    samples //tuple(rows, sipros_results)
+
+    main:
+    psms = sipros_psm_converter(samples)
+
+    emit:
+    psms
+}
 
 workflow isopacketModeler {
     take:
