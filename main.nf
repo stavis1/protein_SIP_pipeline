@@ -161,7 +161,7 @@ workflow sipros {
         | map {fasta, job -> tuple(job[0], job[1], job[2], job[3], fasta[1])}
         | sipros_search
         | groupTuple(size: 100, remainder: true)
-        | map {key, sips, configs, fastas -> tuple(configs[0], sips, fastas[0])}
+        | map {key, sips, configs, fastas -> tuple(key, configs[0], sips, fastas[0])}
         //post-processing
         | sipros_PSM_filter
         | sipros_protein_filter
