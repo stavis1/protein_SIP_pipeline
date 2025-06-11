@@ -138,8 +138,8 @@ process model_fitting {
         --do_PSM_classification \\
         --checkpoint_files subset_*.dill
     
-    mv peptides.dill $\$_peptides.dill
-    mv peptides.tsv $\$_peptides.tsv
+    mv peptides.dill \$\$_peptides.dill
+    mv peptides.tsv \$\$_peptides.tsv
     """
 }
 
@@ -165,7 +165,7 @@ workflow isopacketModeler {
     samples //tuple(rows, PSMs)
 
     main:
-    peptides = samples.map {row, psms -> (psms, file(row.mzml), file(row.amino_acids), row.label_elm, row.label_integer)}
+    peptides = samples.map {row, psms -> tuple(psms, file(row.mzml), file(row.amino_acids), row.label_elm, row.label_integer)}
         | parse_mzml_files
         | collect
         | classifier
