@@ -123,14 +123,14 @@ process sipros_protein_FDR {
 
 process sipros_SIP_abundance {
     container 'stavisvols/psp_sipros:latest'
-    publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "sip/*.*[!sip]"
+    publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "sip/*.txt"
     label 'sipros_med'
 
     input:
     tuple path(sipfiles), path(fasta), val(row)
 
     output:
-    tuple path('sip/'), path(fasta), val(row)
+    tuple path('sip/*.txt'), path(fasta), val(row)
 
     script:
     """
