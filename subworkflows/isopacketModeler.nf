@@ -32,20 +32,24 @@ process parse_mzml_files {
     label 'ipm_3core'
 
     input:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer)
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer)
     
     output:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer), path('design.tsv'), path('*step1_*.dill')
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path('design.tsv'), path('*step1_*.dill')
 
     script:
     """
     echo -e 'file\\tlabel' > design.tsv
-    echo -e '${mzml}\\t${label_elm}[${label_integer}]' >> design.tsv
-    conda run -n isotope_env -m isopacketModeler -o ${options} \\
+    if [ -z ${label_elm} ]; then
+        echo -e '${mzml}\\t' >> design.tsv
+    else
+        echo -e '${mzml}\\t${label_elm}[${label_integer}]' >> design.tsv
+    fi
+    conda run -n isotope_env -m isopacketModeler \\
         --working_directory ./ \\
         --output_directory ./ \\
         --design_file design.tsv \\
-        --mzml_dir ./ \\
+        --mzml_dir ./ \\    
         --psms ${psms} \\
         --psm_headers seq,file,ScanNumber,ParentCharge,proteins \\
         --AA_formulae ${amino_acids} \\
@@ -64,10 +68,10 @@ process classifier {
     label 'ipm_small'
 
     input:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
 
     output:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path('*step2_*.dill')
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path('*step2_*.dill')
 
     script:
     """
@@ -95,10 +99,10 @@ process scatter_peptides {
     label 'ipm_small'
 
     input:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
 
     output:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path('subset_*.dill')
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path('subset_*.dill')
 
     script:
     """
@@ -111,7 +115,7 @@ process model_fitting {
     label 'ipm_small'
 
     input:
-    tuple path(psms), path(mzml), path(options), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
+    tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
 
     output:
     tuple path('*peptides.dill'), path('*peptides.tsv')
@@ -161,12 +165,12 @@ workflow isopacketModeler {
     samples //tuple(rows, PSMs)
 
     main:
-    peptides = samples.map {row, psms -> (psms, file(row.mzml), file(row.ipm_options), file(row.amino_acids), row.label_elm, row.label_integer)}
+    peptides = samples.map {row, psms -> (psms, file(row.mzml), file(row.amino_acids), row.label_elm, row.label_integer)}
         | parse_mzml_files
         | collect
         | classifier
         | scatter_peptides
-        | flatMap {psms, mzml, opts, aas, labelE, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, opts, aas, labelE, labelI, design, dill)}}
+        | flatMap {psms, mzml, aas, labelE, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, aas, labelE, labelI, design, dill)}}
         | model_fitting
         | collect
         | merge_results

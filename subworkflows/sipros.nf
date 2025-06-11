@@ -13,7 +13,11 @@ process config_generator {
     script:
     """
     mkdir cfg
-    conda run -n sipros_env configGenerator -i $global_config_file -o cfg/ -e $row.label_elm
+    elm=$row.label_elm
+    if [ -z \$elm ]; then
+        elm=C
+    fi
+    conda run -n sipros_env configGenerator -i $global_config_file -o cfg/ -e \$elm
     """
 }
 
