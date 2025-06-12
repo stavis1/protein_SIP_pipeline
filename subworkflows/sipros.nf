@@ -1,7 +1,7 @@
 
 process config_generator {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_small'
+    label 'small'
     // publishDir params.results_dir, mode: 'copy'
 
     input:
@@ -23,7 +23,7 @@ process config_generator {
 
 process convert_raw_file {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_med'
+    label 'med'
 
     input:
     tuple val(row), path(rawfile)
@@ -40,7 +40,7 @@ process convert_raw_file {
 
 process search {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_large'    
+    label 'large'    
 
     input:
     tuple val(sample_ID), path(ft_files), path(label_config_file), path(global_config_file), path(fasta)
@@ -57,7 +57,7 @@ process search {
 
 process psm_filter {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_small'
+    label 'small'
 
     input:
     tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
@@ -77,7 +77,7 @@ process psm_filter {
 
 process protein_filter {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_small'
+    label 'small'
 
     input:
     tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
@@ -93,7 +93,7 @@ process protein_filter {
 
 process abundance_cluster {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_small'
+    label 'small'
 
     input:
     tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
@@ -109,7 +109,7 @@ process abundance_cluster {
 
 process protein_FDR {
     container 'stavisvols/psp_sipros:latest'
-    label 'sipros_small'
+    label 'small'
 
     input:
     tuple path(sipfiles), path(fasta), val(row)
@@ -126,7 +126,7 @@ process protein_FDR {
 process sip_abundance {
     container 'stavisvols/psp_sipros:latest'
     publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "sip/*.txt"
-    label 'sipros_med'
+    label 'med'
 
     input:
     tuple path(sipfiles), path(fasta), val(row)

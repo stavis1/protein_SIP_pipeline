@@ -1,7 +1,7 @@
 
 process sipros_psm_converter {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'ipm_small'
+    label 'small'
 
     input:
     tuple val(row), path(sipros_results)
@@ -18,7 +18,7 @@ process sipros_psm_converter {
 
 process parse_mzml_files {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'ipm_3core'
+    label 'med'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer)
@@ -54,7 +54,7 @@ process parse_mzml_files {
 
 process classifier {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'ipm_small'
+    label 'small'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
@@ -85,7 +85,7 @@ process classifier {
 
 process scatter_peptides {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'ipm_small'
+    label 'small'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
@@ -101,7 +101,7 @@ process scatter_peptides {
 
 process model_fitting {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'ipm_small'
+    label 'small'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
@@ -134,7 +134,7 @@ process model_fitting {
 
 process merge_results {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'ipm_small'
+    label 'small'
 
     input:
     tuple path(dill), path(tsv) 
