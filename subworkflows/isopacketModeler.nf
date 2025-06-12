@@ -28,33 +28,35 @@ process parse_mzml_files {
 
     script:
     """
-    echo -e 'file\\tlabel' > design.tsv
+    echo -e 'file\\tlabel' > design.tsv 
     if [ -z ${label_elm} ]; then
         echo -e '${mzml}\\t' >> design.tsv
     else
         echo -e '${mzml}\\t${label_elm}[${label_integer}]' >> design.tsv
     fi
-    conda run -n isotope_env python -m isopacketModeler cmd \\
-        --working_directory ./ \\
-        --output_directory ./ \\
-        --design_file design.tsv \\
-        --mzml_dir ./ \\    
-        --psms ${psms} \\
-        --psm_headers seq,file,ScanNumber,ParentCharge,proteins \\
-        --AA_formulae ${amino_acids} \\
-        --cores 3 \\
-        --data_generating_processes BetabinomQuiescentMix \\
-        --data_generating_processes Betabinom \\
-        --data_generating_processes BinomQuiescentMix \\
-        --data_generating_processes Binom \\
-        --do_PSM_classification \\
-        --stopping_point 1
+    cmd='''
+    --working_directory ./
+    --output_directory ./
+    --design_file design.tsv
+    --mzml_dir ./
+    --psms ${psms}
+    --psm_headers seq,file,ScanNumber,ParentCharge,proteins
+    --AA_formulae ${amino_acids}
+    --cores 3
+    --data_generating_processes BetabinomQuiescentMix
+    --data_generating_processes Betabinom
+    --data_generating_processes BinomQuiescentMix
+    --data_generating_processes Binom
+    --do_PSM_classification
+    --stopping_point 1
+    '''
+    conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     """
 }
 
 process classifier {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'small'
+    label 'large'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
@@ -64,22 +66,24 @@ process classifier {
 
     script:
     """
-    conda run -n isotope_env python -m isopacketModeler cmd \\
-        --working_directory ./ \\
-        --output_directory ./ \\
-        --design_file design.tsv \\
-        --mzml_dir ./ \\
-        --psms ${psms} \\
-        --psm_headers seq,file,ScanNumber,ParentCharge,proteins \\
-        --AA_formulae ${amino_acids} \\
-        --cores 3 \\
-        --data_generating_processes BetabinomQuiescentMix \\
-        --data_generating_processes Betabinom \\
-        --data_generating_processes BinomQuiescentMix \\
-        --data_generating_processes Binom \\
-        --do_PSM_classification \\
-        --checkpoint_files *step1_*.dill \\
-        --stopping_point 2
+    cmd='''
+    --working_directory ./
+    --output_directory ./
+    --design_file design.tsv
+    --mzml_dir ./
+    --psms ${psms}
+    --psm_headers seq,file,ScanNumber,ParentCharge,proteins
+    --AA_formulae ${amino_acids}
+    --cores 3
+    --data_generating_processes BetabinomQuiescentMix
+    --data_generating_processes Betabinom
+    --data_generating_processes BinomQuiescentMix
+    --data_generating_processes Binom
+    --do_PSM_classification
+    --checkpoint_files *step1_*.dill
+    --stopping_point 2
+    '''
+    conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     """
 }
 
@@ -101,7 +105,7 @@ process scatter_peptides {
 
 process model_fitting {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'small'
+    label 'large'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
@@ -111,21 +115,23 @@ process model_fitting {
 
     script:
     """
-    conda run -n isotope_env python -m isopacketModeler cmd \\
-        --working_directory ./ \\
-        --output_directory ./ \\
-        --design_file design.tsv \\
-        --mzml_dir ./ \\
-        --psms ${psms} \\
-        --psm_headers seq,file,ScanNumber,ParentCharge,proteins \\
-        --AA_formulae ${amino_acids} \\
-        --cores 3 \\
-        --data_generating_processes BetabinomQuiescentMix \\
-        --data_generating_processes Betabinom \\
-        --data_generating_processes BinomQuiescentMix \\
-        --data_generating_processes Binom \\
-        --do_PSM_classification \\
-        --checkpoint_files subset_*.dill
+    cmd='''
+    --working_directory ./
+    --output_directory ./
+    --design_file design.tsv
+    --mzml_dir ./
+    --psms ${psms}
+    --psm_headers seq,file,ScanNumber,ParentCharge,proteins
+    --AA_formulae ${amino_acids}
+    --cores 3
+    --data_generating_processes BetabinomQuiescentMix
+    --data_generating_processes Betabinom
+    --data_generating_processes BinomQuiescentMix
+    --data_generating_processes Binom
+    --do_PSM_classification
+    --checkpoint_files subset_*.dill
+    '''
+    conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     
     mv peptides.dill \$\$_peptides.dill
     mv peptides.tsv \$\$_peptides.tsv
