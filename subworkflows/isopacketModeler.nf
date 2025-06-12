@@ -56,7 +56,7 @@ process parse_mzml_files {
 
 process classifier {
     container 'stavisvols/psp_isopacketmodeler'
-    label 'large'
+    label 'huge'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(design_file), path(checkpoints)
