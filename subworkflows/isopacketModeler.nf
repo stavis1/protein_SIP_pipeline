@@ -1,6 +1,6 @@
 
 process sipros_psm_converter {
-    container 'stavisvols/psp_isopacketmodeler'
+    container 'stavisvols/psp_isopacketmodeler:latest'
     label 'small'
 
     input:
@@ -17,7 +17,7 @@ process sipros_psm_converter {
 
 
 process parse_mzml_files {
-    container 'stavisvols/psp_isopacketmodeler'
+    container 'stavisvols/psp_isopacketmodeler:latest'
     label 'med'
 
     input:
@@ -55,7 +55,7 @@ process parse_mzml_files {
 }
 
 process classifier {
-    container 'stavisvols/psp_isopacketmodeler'
+    container 'stavisvols/psp_isopacketmodeler:latest'
     label 'huge'
 
     input:
@@ -88,7 +88,7 @@ process classifier {
 }
 
 process scatter_peptides {
-    container 'stavisvols/psp_isopacketmodeler'
+    container 'stavisvols/psp_isopacketmodeler:latest'
     label 'small'
 
     input:
@@ -104,7 +104,7 @@ process scatter_peptides {
 }
 
 process model_fitting {
-    container 'stavisvols/psp_isopacketmodeler'
+    container 'stavisvols/psp_isopacketmodeler:latest'
     label 'large'
 
     input:
@@ -139,7 +139,7 @@ process model_fitting {
 }
 
 process merge_results {
-    container 'stavisvols/psp_isopacketmodeler'
+    container 'stavisvols/psp_isopacketmodeler:latest'
     label 'small'
 
     input:
