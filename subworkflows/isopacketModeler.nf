@@ -34,7 +34,7 @@ process parse_mzml_files {
     else
         echo -e '${mzml}\\t${label_elm}[${label_integer}]' >> design.tsv
     fi
-    conda run -n isotope_env python -m isopacketModeler \\
+    conda run -n isotope_env python -m isopacketModeler cmd \\
         --working_directory ./ \\
         --output_directory ./ \\
         --design_file design.tsv \\
@@ -64,7 +64,7 @@ process classifier {
 
     script:
     """
-    conda run -n isotope_env python -m isopacketModeler -o ${options} \\
+    conda run -n isotope_env python -m isopacketModeler cmd \\
         --working_directory ./ \\
         --output_directory ./ \\
         --design_file design.tsv \\
@@ -111,7 +111,7 @@ process model_fitting {
 
     script:
     """
-    conda run -n isotope_env python -m isopacketModeler -o ${options} \\
+    conda run -n isotope_env python -m isopacketModeler cmd \\
         --working_directory ./ \\
         --output_directory ./ \\
         --design_file design.tsv \\
