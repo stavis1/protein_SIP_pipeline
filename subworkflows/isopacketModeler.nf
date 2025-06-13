@@ -41,13 +41,13 @@ process parse_mzml_files {
     --mzml_dir ./
     --psms ${psms}
     --psm_headers seq,file,ScanNumber,ParentCharge,proteins
-    --AA_formulae ${amino_acids}
+    --aa_formulae ${amino_acids}
     --cores 3
     --data_generating_processes BetabinomQuiescentMix
     --data_generating_processes Betabinom
     --data_generating_processes BinomQuiescentMix
     --data_generating_processes Binom
-    --do_PSM_classification
+    --do_psm_classification
     --stopping_point 1
     --overwrite
     '''
@@ -74,13 +74,13 @@ process classifier {
     --mzml_dir ./
     --psms ${psms}
     --psm_headers seq,file,ScanNumber,ParentCharge,proteins
-    --AA_formulae ${amino_acids}
+    --aa_formulae ${amino_acids}
     --cores 3
     --data_generating_processes BetabinomQuiescentMix
     --data_generating_processes Betabinom
     --data_generating_processes BinomQuiescentMix
     --data_generating_processes Binom
-    --do_PSM_classification
+    --do_psm_classification
     --checkpoint_files *step1_*.dill
     --stopping_point 2
     --overwrite
@@ -124,13 +124,13 @@ process model_fitting {
     --mzml_dir ./
     --psms ${psms}
     --psm_headers seq,file,ScanNumber,ParentCharge,proteins
-    --AA_formulae ${amino_acids}
+    --aa_formulae ${amino_acids}
     --cores 3
     --data_generating_processes BetabinomQuiescentMix
     --data_generating_processes Betabinom
     --data_generating_processes BinomQuiescentMix
     --data_generating_processes Binom
-    --do_PSM_classification
+    --do_psm_classification
     --checkpoint_files subset_*.dill
     --overwrite
     '''
