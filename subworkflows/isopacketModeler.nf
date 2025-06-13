@@ -49,6 +49,7 @@ process parse_mzml_files {
     --data_generating_processes Binom
     --do_PSM_classification
     --stopping_point 1
+    --overwrite
     '''
     conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     """
@@ -82,6 +83,7 @@ process classifier {
     --do_PSM_classification
     --checkpoint_files *step1_*.dill
     --stopping_point 2
+    --overwrite
     '''
     conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     """
@@ -130,6 +132,7 @@ process model_fitting {
     --data_generating_processes Binom
     --do_PSM_classification
     --checkpoint_files subset_*.dill
+    --overwrite
     '''
     conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     
