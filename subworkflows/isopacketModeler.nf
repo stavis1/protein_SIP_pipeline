@@ -52,6 +52,9 @@ process parse_mzml_files {
     --overwrite
     '''
     conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
+    pathhash=\$(basename \$(pwd))
+    dillfile=\$(ls *step1_*.dill)
+    mv \$dillfile \$(echo \$dillfile | sed "s|\(.*_step1_\)[[:digit:]]*.dill|\1\${pathhash}.dill|g")
     """
 }
 
@@ -136,8 +139,9 @@ process model_fitting {
     '''
     conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     
-    mv peptides.dill \$\$_peptides.dill
-    mv peptides.tsv \$\$_peptides.tsv
+    pathhash=\$(basename \$(pwd))
+    mv peptides.dill \${pathhash}_peptides.dill
+    mv peptides.tsv \${pathhash}_peptides.tsv
     """
 }
 
@@ -176,7 +180,8 @@ workflow isopacketModeler {
     main:
     peptides = samples.map {row, psms -> tuple(psms, file(row.mzml), file(row.amino_acids), row.label_elm, row.label_integer)}
         | parse_mzml_files
-        | collect
+        | collect(flat:false)
+       	| map {data -> tuple(data[0][0..5] + [data.collect {f -> f[6]}])}
         | classifier
         | scatter_peptides
         | flatMap {psms, mzml, aas, labelE, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, aas, labelE, labelI, design, dill)}}
