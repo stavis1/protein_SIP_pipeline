@@ -28,11 +28,12 @@ process parse_mzml_files {
 
     script:
     """
+    filename="\${${mzml}%.*}"
     echo -e 'file\\tlabel' > design.tsv 
     if [ -z ${label_elm} ]; then
-        echo -e '${mzml}\\t' >> design.tsv
+        echo -e '\$filename\\t' >> design.tsv
     else
-        echo -e '${mzml}\\t${label_elm}[${label_integer}]' >> design.tsv
+        echo -e '\$filename\\t${label_elm}[${label_integer}]' >> design.tsv
     fi
     cmd='''
     --working_directory ./
@@ -84,11 +85,10 @@ process classifier {
     --data_generating_processes BinomQuiescentMix
     --data_generating_processes Binom
     --do_psm_classification
-    --checkpoint_files *step1_*.dill
     --stopping_point 2
     --overwrite
     '''
-    conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
+    conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n') --checkpoint_files '*step1_*.dill'
     """
 }
 
