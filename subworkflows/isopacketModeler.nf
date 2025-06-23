@@ -28,12 +28,13 @@ process parse_mzml_files {
 
     script:
     """
-    filename="\${${mzml}%.*}"
+    mzml=$mzml
+    filename="\${\$mzml%.*}"
     echo -e 'file\\tlabel' > design.tsv 
     if [ -z ${label_elm} ]; then
-        echo -e '\$filename\\t' >> design.tsv
+        echo -e \$filename'\\t' >> design.tsv
     else
-        echo -e '\$filename\\t${label_elm}[${label_integer}]' >> design.tsv
+        echo -e \$filename'\\t${label_elm}[${label_integer}]' >> design.tsv
     fi
     cmd='''
     --working_directory ./
