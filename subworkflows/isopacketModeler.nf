@@ -29,7 +29,7 @@ process parse_mzml_files {
     script:
     """
     mzml=$mzml
-    filename="\${\$mzml%.*}"
+    filename="\${mzml%.*}"
     echo -e 'file\\tlabel' > design.tsv 
     if [ -z ${label_elm} ]; then
         echo -e \$filename'\\t' >> design.tsv
