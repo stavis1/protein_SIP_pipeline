@@ -43,7 +43,6 @@ process parse_mzml_files {
     --psms ${psms}
     --psm_headers seq,file,ScanNumber,ParentCharge,proteins
     --aa_formulae ${amino_acids}
-    --cores 3
     --data_generating_processes BetabinomQuiescentMix
     --data_generating_processes Betabinom
     --data_generating_processes BinomQuiescentMix
@@ -79,7 +78,6 @@ process classifier {
     --psms ${psms}
     --psm_headers seq,file,ScanNumber,ParentCharge,proteins
     --aa_formulae ${amino_acids}
-    --cores 3
     --data_generating_processes BetabinomQuiescentMix
     --data_generating_processes Betabinom
     --data_generating_processes BinomQuiescentMix
@@ -128,7 +126,6 @@ process model_fitting {
     --psms ${psms}
     --psm_headers seq,file,ScanNumber,ParentCharge,proteins
     --aa_formulae ${amino_acids}
-    --cores 3
     --data_generating_processes BetabinomQuiescentMix
     --data_generating_processes Betabinom
     --data_generating_processes BinomQuiescentMix
