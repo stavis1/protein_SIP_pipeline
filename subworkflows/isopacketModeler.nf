@@ -54,7 +54,7 @@ process parse_mzml_files {
     conda run -n isotope_env python -m isopacketModeler cmd \$(echo \$cmd | tr -d '\\n')
     pathhash=\$(basename \$(pwd))
     dillfile=\$(ls *step1_*.dill)
-    mv \$dillfile \$(echo \$dillfile | sed "s|\(.*_step1_\)[[:digit:]]*.dill|\1\${pathhash}.dill|g")
+    mv \$dillfile \$(echo \$dillfile | sed "s|\\(.*_step1_\\)[[:digit:]]*.dill|\\1\${pathhash}.dill|g")
     """
 }
 
