@@ -188,6 +188,7 @@ workflow isopacketModeler {
         | flatMap {psms, mzml, aas, labelE, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, aas, labelE, labelI, design, dill)}}
         | model_fitting
         | collect
+        | map {data -> [data.findAll {it.getExtension() == 'dill'}] + [data.findAll {it.getExtension() == 'tsv'}]}
         | merge_results
 
     emit:
