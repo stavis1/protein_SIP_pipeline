@@ -14,7 +14,7 @@ dillfiles = [f for f in os.listdir() if f.endswith('.dill')]
 peptides = []
 for dillfile in dillfiles:
     with open(dillfile, 'rb') as dillhandle:
-        peptides.extend(dill.read(dillhandle))
+        peptides.extend(dill.load(dillhandle))
 with open('peptides.dill', 'wb') as dillhandle:
     dill.dump(peptides, dillhandle)
 
