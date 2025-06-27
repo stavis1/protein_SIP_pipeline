@@ -148,6 +148,7 @@ process model_fitting {
 
 process merge_results {
     container 'stavisvols/psp_isopacketmodeler:latest'
+    publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "peptides.*"
     label 'small'
 
     input:
