@@ -6,3 +6,4 @@ RUN mkdir /scripts/
 COPY sipros2IPM.py /scripts/
 COPY split_peptides.py /scripts/
 COPY merge_peptides.py /scripts/
+COPY formula_parser.py /scripts/

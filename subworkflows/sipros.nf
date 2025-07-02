@@ -8,16 +8,17 @@ process config_generator {
     tuple val(row), path(global_config_file)
 
     output:
-    tuple val(row.sample_ID), path('cfg/*.cfg'), path(global_config_file)
+    tuple val(row.sample_ID), path('cfg/*.cfg'), path('config.cfg')
 
     script:
     """
+    sed -e '/IsopacketModeler/,$d' $global_config_file > config.cfg
     mkdir cfg
     elm=$row.label_elm
     if [ -z \$elm ]; then
         elm=C
     fi
-    conda run -n sipros_env configGenerator -i $global_config_file -o cfg/ -e \$elm
+    conda run -n sipros_env configGenerator -i config.cfg -o cfg/ -e \$elm
     """
 }
 
