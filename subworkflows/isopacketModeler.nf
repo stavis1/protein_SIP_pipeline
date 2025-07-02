@@ -163,7 +163,7 @@ workflow isopacketModeler {
        	| map {data -> tuple(data[0][0..7] + [data.collect {f -> f[8]}])}
         | classifier
         | scatter_peptides
-        | flatMap {psms, mzml, aas, labelE, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, aas, labelE, labelI, design, dill)}}
+        | flatMap {psms, mzml, aas, labelE, config, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, aas, labelE, labelI, config, design, dill)}}
         | model_fitting
         | collect
         | map {data -> [data.findAll {it.getExtension() == 'dill'}] + [data.findAll {it.getExtension() == 'tsv'}]}
