@@ -149,7 +149,7 @@ workflow sipros {
     //config file processing
     indexed_rows = rows.map {r -> tuple(r.sample_ID, r)}
 
-    config_files = rows.map {r -> tuple(r, file(r.sipros_config))}
+    config_files = rows.map {r -> tuple(r, file(r.config))}
         | config_generator
         | flatMap {r -> r[1].collect {f -> tuple(r[0], f, r[2])}}
 
