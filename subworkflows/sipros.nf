@@ -8,7 +8,7 @@ process config_generator {
     tuple val(row), path(global_config_file)
 
     output:
-    tuple val(row.sample_ID), path('cfg/*.cfg'), path('config_*.cfg')
+    tuple val(row), path('cfg/*.cfg'), path('config_*.cfg')
 
     script:
     """
@@ -153,6 +153,12 @@ workflow sipros {
     config_files = rows.map {r -> tuple(r, file(r.config))}
         | config_generator
         | flatMap {r -> r[1].collect {f -> tuple(r[0], f, r[2])}}
+        | filter {row, cfg, cfg_g -> 
+            def match = cfg.getBaseName() =~ /(\d+)Pct/
+            def pct = match[0][1].toInteger()
+            pct % (row.sipros_reduce*1000) == 0
+        }
+        | map {row, cfg, cfg_g -> tuple(row.sample_ID, cfg, cfg_g)}
 
     search_jobs = rows.map {r -> tuple(r, file(r.raw_file))}
         | convert_raw_file
