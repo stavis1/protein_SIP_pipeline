@@ -156,7 +156,8 @@ workflow sipros {
         | filter {row, cfg, cfg_g -> 
             def match = cfg.getBaseName() =~ /(\d+)Pct/
             def pct = match[0][1].toInteger()
-            pct % (row.sipros_reduce*1000) == 0
+            def reduction_factor = row.sipros_reduce.toInteger()*1000
+            pct % reduction_factor == 0 || pct == 1070 
         }
         | map {row, cfg, cfg_g -> tuple(row.sample_ID, cfg, cfg_g)}
 
