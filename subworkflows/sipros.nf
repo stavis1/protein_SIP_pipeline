@@ -12,7 +12,7 @@ process config_generator {
 
     script:
     """
-    sed -e '/IsopacketModeler/,$d' $global_config_file > config.cfg
+    sed -e '/IsopacketModeler/,\$d' $global_config_file > config.cfg
     mkdir cfg
     elm=$row.label_elm
     if [ -z \$elm ]; then

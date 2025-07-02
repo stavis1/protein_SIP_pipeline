@@ -29,7 +29,7 @@ process parse_mzml_files {
     script:
     """
     #parse config file
-    psm_line=$(echo "['"$psms"']")
+    psm_line=\$(echo "['"$psms"']")
     sed -n -e '/IsopacketModeler/,\$p' $config | \\
         sed 's|@CORES|$task.cpus|g' | \\
         sed "s|@PSMS|\$psm_line|g" | \\
@@ -70,7 +70,7 @@ process classifier {
     script:
     """
     #parse config file
-    psm_line=$(echo "['"$psms"']")
+    psm_line=\$(echo "['"$psms"']")
     sed -n -e '/IsopacketModeler/,\$p' $config | \\
         sed 's|@CORES|$task.cpus|g' | \\
         sed "s|@PSMS|\$psm_line|g" | \\
@@ -109,7 +109,7 @@ process model_fitting {
     script:
     """
     #parse config file
-    psm_line=$(echo "['"$psms"']")
+    psm_line=\$(echo "['"$psms"']")
     sed -n -e '/IsopacketModeler/,\$p' $config | \\
         sed 's|@CORES|$task.cpus|g' | \\
         sed "s|@PSMS|\$psm_line|g" | \\
