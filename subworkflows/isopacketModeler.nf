@@ -157,7 +157,7 @@ workflow isopacketModeler {
     samples //tuple(rows, PSMs)
 
     main:
-    peptides = samples.map {row, psms -> tuple(psms, file(row.mzml), row.label_elm, row.label_integer)}
+    peptides = samples.map {row, psms -> tuple(psms, file(row.mzml), row.label_elm, row.label_integer, path(row.config))}
         | parse_mzml_files
         | collect(flat:false)
        	| map {data -> tuple(data[0][0..7] + [data.collect {f -> f[8]}])}
