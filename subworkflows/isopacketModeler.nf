@@ -11,7 +11,7 @@ process sipros_psm_converter {
 
     script:
     """
-    conda run -n isotope_env python /scripts/sipros2IPM.py ${row.sample_ID}
+    python /scripts/sipros2IPM.py ${row.sample_ID}
     """
 }
 
@@ -50,7 +50,7 @@ process parse_mzml_files {
     conda run -n iosotope_env python /scripts/formula_parser.py $config
 
     #parse mzML file
-    conda run -n isotope_env python -m isopacketModeler file --options options.toml
+    python -m isopacketModeler file --options options.toml
     pathhash=\$(basename \$(pwd))
     dillfile=\$(ls *step1_*.dill)
     mv \$dillfile \$(echo \$dillfile | sed "s|\\(.*_step1_\\)[[:digit:]]*.dill|\\1\${pathhash}.dill|g")
@@ -76,7 +76,7 @@ process classifier {
         sed "s|@PSMS|\$psm_line|g" | \\
         sed 's|@CHECKPOINT|"*step1_*.dill"|g' | \\
         sed 's|@STOP|2|g' > options.toml
-    conda run -n isotope_env python -m isopacketModeler file --options options.toml
+    python -m isopacketModeler file --options options.toml
     """
 }
 
@@ -92,7 +92,7 @@ process scatter_peptides {
 
     script:
     """
-    conda run -n isotope_env python /scripts/split_peptides.py ${checkpoints} 50
+    python /scripts/split_peptides.py ${checkpoints} 50
     """
 }
 
@@ -115,7 +115,7 @@ process model_fitting {
         sed "s|@PSMS|\$psm_line|g" | \\
         sed 's|@CHECKPOINT|"subset_*.dill"|g' | \\
         sed 's|@STOP|false|g' > options.toml
-    conda run -n isotope_env python -m isopacketModeler file --options options.toml
+    python -m isopacketModeler file --options options.toml
     
     pathhash=\$(basename \$(pwd))
     mv peptides.dill \${pathhash}_peptides.dill
@@ -136,7 +136,7 @@ process merge_results {
 
     script:
     """
-    conda run -n isotope_env python /scripts/merge_peptides.py
+    python /scripts/merge_peptides.py
     """
 }
 

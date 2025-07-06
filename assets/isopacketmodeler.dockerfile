@@ -1,6 +1,12 @@
-FROM continuumio/miniconda3:latest
+FROM python:3.11.9
 
-RUN wget https://raw.githubusercontent.com/stavis1/isopacketModeler/refs/heads/main/env/run.yml && conda env create -n isotope_env -f run.yml
+RUN mkdir /software/
+COPY isopacketmodeler_requirements.txt /software/
+RUN cd /software/ && \
+    pip install -r isopacketmodeler_requirements.txt && \
+    git clone https://github.com/stavis1/isopacketModeler && \
+    cd isopacketModeler && \
+    pip install ./
 
 RUN mkdir /scripts/
 COPY sipros2IPM.py /scripts/
