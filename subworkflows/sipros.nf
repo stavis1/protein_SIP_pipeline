@@ -19,7 +19,7 @@ process config_generator {
     if [ -z \$elm ]; then
         elm=C
     fi
-    conda run -n sipros_env configGenerator -i config_\$pathhash.cfg -o cfg/ -e \$elm
+    /software/Sipros4/bin/configGenerator -i config_\$pathhash.cfg -o cfg/ -e \$elm
     """
 }
 
@@ -36,7 +36,7 @@ process convert_raw_file {
     script:
     //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
     """
-    conda run -n sipros_env mono /opt/conda/envs/sipros_env/bin/Raxport.exe -i ./ -o ./ -j 3
+    mono /software/Sipros4/bin/Raxport.exe -i ./ -o ./ -j 3
     """
 }
 
@@ -53,7 +53,7 @@ process search {
     script:
     """
     export OMP_NUM_THREADS=4
-    conda run -n sipros_env SiprosV4OMP -f ./*.FT2 -c $label_config_file -o ./
+    /software/Sipros4/bin/SiprosV4OMP -f ./*.FT2 -c $label_config_file -o ./
     """
 }
 
@@ -73,7 +73,7 @@ process psm_filter {
     cd sip
     ln -s ../*.sip .
     cd ../
-    conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/sipros_peptides_filtering.py -c $config_file -w sip/
+    python /software/Sipros4/V4Scripts/sipros_peptides_filtering.py -c $config_file -w sip/
     """
 }
 
@@ -89,7 +89,7 @@ process protein_filter {
 
     script:
     """
-    conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/sipros_peptides_assembling.py -c $config_file -w sip/
+    python /software/Sipros4/V4Scripts/sipros_peptides_assembling.py -c $config_file -w sip/
     """
 }
 
@@ -105,7 +105,7 @@ process abundance_cluster {
 
     script:
     """
-    conda run -n sipros_env python /opt/conda/envs/sipros_env/V4Scripts/ClusterSip.py -c $config_file -w sip/
+    python /software/Sipros4/V4Scripts/ClusterSip.py -c $config_file -w sip/
     """
 }
 
@@ -121,7 +121,7 @@ process protein_FDR {
 
     script:
     """
-    conda run -n sipros_env Rscript /opt/conda/envs/sipros_env/V4Scripts/refineProteinFDR.R -pro sip/*.pro.txt -psm sip/*.psm.txt -fdr 0.01 -o sip/$row.sample_ID
+    Rscript /software/Sipros4/V4Scripts/refineProteinFDR.R -pro sip/*.pro.txt -psm sip/*.psm.txt -fdr 0.01 -o sip/$row.sample_ID
     """
 }
 
@@ -138,7 +138,7 @@ process sip_abundance {
 
     script:
     """
-    conda run -n sipros_env Rscript /opt/conda/envs/sipros_env/V4Scripts/getLabelPCTinEachFT.R -pro sip/*.proRefineFDR.txt -psm sip/*.psm.txt -thr 3 -o sip/$row.sample_ID
+    Rscript /software/Sipros4/V4Scripts/getLabelPCTinEachFT.R -pro sip/*.proRefineFDR.txt -psm sip/*.psm.txt -thr 3 -o sip/$row.sample_ID
     """
 }
 
