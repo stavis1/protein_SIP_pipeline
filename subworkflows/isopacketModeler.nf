@@ -47,7 +47,7 @@ process parse_mzml_files {
     fi
 
     #get amino acid formula file
-    conda run -n iosotope_env python /scripts/formula_parser.py $config
+    python /scripts/formula_parser.py $config
 
     #parse mzML file
     python -m isopacketModeler file --options options.toml
