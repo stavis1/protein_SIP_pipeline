@@ -1,6 +1,6 @@
 
 process config_generator {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_mono:latest'
     label 'small'
     // publishDir params.results_dir, mode: 'copy'
 
@@ -24,7 +24,7 @@ process config_generator {
 }
 
 process convert_raw_file {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_mono:latest'
     label 'med'
 
     input:
@@ -41,7 +41,7 @@ process convert_raw_file {
 }
 
 process search {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_mono:latest'
     label 'large'    
 
     input:
@@ -58,7 +58,7 @@ process search {
 }
 
 process psm_filter {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_python:latest'
     label 'small'
 
     input:
@@ -78,7 +78,7 @@ process psm_filter {
 }
 
 process protein_filter {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_python:latest'
     label 'small'
 
     input:
@@ -94,7 +94,7 @@ process protein_filter {
 }
 
 process abundance_cluster {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_python:latest'
     label 'small'
 
     input:
@@ -110,7 +110,7 @@ process abundance_cluster {
 }
 
 process protein_FDR {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_r:latest'
     label 'small'
 
     input:
@@ -126,7 +126,7 @@ process protein_FDR {
 }
 
 process sip_abundance {
-    container 'stavisvols/psp_sipros:latest'
+    container 'stavisvols/psp_sipros_r:latest'
     publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "sip/*.txt"
     label 'med'
 
