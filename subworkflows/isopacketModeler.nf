@@ -33,7 +33,7 @@ process parse_mzml_files {
     sed -n -e '/IsopacketModeler/,\$p' $config | \\
         sed 's|@CORES|$task.cpus|g' | \\
         sed "s|@PSMS|\$psm_line|g" | \\
-        sed 's|@CHECKPOINT||g' | \\
+        sed 's|@CHECKPOINT|\\[\\]|g' | \\
         sed 's|@STOP|1|g' > options.toml
 
     #make design file
@@ -74,7 +74,7 @@ process classifier {
     sed -n -e '/IsopacketModeler/,\$p' $config | \\
         sed 's|@CORES|$task.cpus|g' | \\
         sed "s|@PSMS|\$psm_line|g" | \\
-        sed 's|@CHECKPOINT|"*step1_*.dill"|g' | \\
+        sed 's|@CHECKPOINT|\\["*step1_*.dill"\\]|g' | \\
         sed 's|@STOP|2|g' > options.toml
     python -m isopacketModeler file --options options.toml
     """
@@ -113,7 +113,7 @@ process model_fitting {
     sed -n -e '/IsopacketModeler/,\$p' $config | \\
         sed 's|@CORES|$task.cpus|g' | \\
         sed "s|@PSMS|\$psm_line|g" | \\
-        sed 's|@CHECKPOINT|"subset_*.dill"|g' | \\
+        sed 's|@CHECKPOINT|\\["subset_*.dill"\\]|g' | \\
         sed 's|@STOP|false|g' > options.toml
     python -m isopacketModeler file --options options.toml
     
