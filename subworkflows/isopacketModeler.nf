@@ -160,7 +160,7 @@ workflow isopacketModeler {
     peptides = samples.map {row, psms -> tuple(psms, file(row.mzml), row.label_elm, row.label_integer, file(row.config))}
         | parse_mzml_files
         | collect(flat:false)
-       	| map {data -> tuple(data[0][0..7] + [data.collect {f -> f[8]}])}
+       	| map {data -> tuple(data[0][0..6] + [data.collect {f -> f[7]}])}
         | classifier
         | scatter_peptides
         | flatMap {psms, mzml, aas, labelE, config, labelI, design, dills -> dills.collect {dill -> tuple(psms, mzml, aas, labelE, labelI, config, design, dill)}}
