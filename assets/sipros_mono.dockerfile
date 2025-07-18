@@ -13,4 +13,12 @@ RUN apt install mono-complete -y
 RUN cd /software/ && \
     wget https://github.com/thepanlab/Sipros4/releases/download/4.02/siprosRelease.zip && \
     unzip siprosRelease.zip -d Sipros4 && \
+    rm siprosRelease.zip && \
     chmod -R +x Sipros4/
+
+#install ThermoRawFileParser
+RUN cd /software/ && \
+    wget https://github.com/CompOmics/ThermoRawFileParser/releases/download/v1.4.5/ThermoRawFileParser1.4.5.zip && \
+    unzip ThermoRawFileParser1.4.5.zip && \
+    rm ThermoRawFileParser1.4.5.zip
+    
