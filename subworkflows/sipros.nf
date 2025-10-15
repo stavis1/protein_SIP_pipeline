@@ -24,8 +24,8 @@ process config_generator {
 }
 
 process convert_raw_file {
-    container 'stavisvols/psp_sipros_mono:latest'
-    label 'med'
+    container 'stavisvols/psp_sipros_python:latest'
+    label 'small'
 
     input:
     tuple val(row), path(rawfile)
@@ -37,6 +37,22 @@ process convert_raw_file {
     //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
     """
     mono /software/Sipros4/bin/Raxport.exe -i ./ -o ./ -j 3
+    """
+}
+
+process process_fasta {
+    container 'stavisvols/psp_sipros_mono:latest'
+    label 'med'
+
+    input:
+    tuple val(sample_ID), path(fasta), path(config)
+
+    output:
+    tuple val(sample_ID), path('DECOY_*')
+
+    script:
+    """
+    python /software/Sipros4/EnsembleScripts/sipros_prepare_protein_database.py -i $fasta -o DECOY_$fasta -c $config
     """
 }
 
@@ -167,7 +183,8 @@ workflow sipros {
         | cross(config_files)
         | map {FT, config -> tuple(FT[0], FT[1], config[1], config[2])}
 
-    search_results = rows.map {r -> tuple(r.sample_ID, file(r.fasta))}
+    search_results = rows.map {r -> tuple(r.sample_ID, file(r.fasta), file(r.config))}
+        | process_fasta
         | cross(search_jobs)
         | map {fasta, job -> tuple(job[0], job[1], job[2], job[3], fasta[1])}
         | search
