@@ -48,11 +48,12 @@ process process_fasta {
     tuple val(sample_ID), path(fasta), path(config)
 
     output:
-    tuple val(sample_ID), path('DECOY_*')
+    tuple val(sample_ID), path(fasta)
 
     script:
     """
     python /software/Sipros4/EnsembleScripts/sipros_prepare_protein_database.py -i $fasta -o DECOY_$fasta -c $config
+    mv DECOY_$fasta fasta
     """
 }
 
