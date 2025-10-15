@@ -24,7 +24,7 @@ process config_generator {
 }
 
 process convert_raw_file {
-    container 'stavisvols/psp_sipros_python:latest'
+    container 'stavisvols/psp_sipros_mono:latest'
     label 'small'
 
     input:
@@ -41,7 +41,7 @@ process convert_raw_file {
 }
 
 process process_fasta {
-    container 'stavisvols/psp_sipros_mono:latest'
+    container 'stavisvols/psp_sipros_python:latest'
     label 'med'
 
     input:
