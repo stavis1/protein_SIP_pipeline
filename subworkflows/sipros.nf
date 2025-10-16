@@ -48,7 +48,7 @@ process process_fasta {
     tuple val(sample_ID), path(fasta), path(config), val(row)
 
     output:
-    tuple val(sample_ID), path(fasta), path(config)
+    tuple val(sample_ID), path(fasta), path(config), val(row)
 
     script:
     """
@@ -231,7 +231,7 @@ workflow sipros {
     fastas_with_decoys = rows.map {r -> tuple(r.sample_ID, file(r.fasta), file(r.config), r)}
         | process_fasta
         | branch { r -> 
-            labeled: r.label_elm != null
+            labeled: r[3].label_elm != null
             unlabeled: true
         }
     
