@@ -236,7 +236,7 @@ workflow sipros {
         }
     
     //unlabeled search
-    unlabeled_search_results = fastas_with_decoys.unlabeled.cross(convert_raw_file)
+    unlabeled_search_results = fastas_with_decoys.unlabeled.cross(converted_files)
         | map {fasta, FT -> tuple(FT[0], FT[1], fasta[1], fasta[2])}
         | unlabeled_search
         | unlabeled_python_postprocessing
