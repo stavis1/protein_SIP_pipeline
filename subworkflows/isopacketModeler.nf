@@ -18,6 +18,7 @@ process sipros_psm_converter {
 process convert_raw_file {
     container 'stavisvols/psp_sipros_mono:latest'
     label 'small'
+    stageInMode 'link'
 
     input:
     tuple path(psms), path(raw_file), val(label_elm), val(label_integer), path(config)
