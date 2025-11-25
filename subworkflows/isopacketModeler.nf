@@ -15,6 +15,24 @@ process sipros_psm_converter {
     """
 }
 
+process convert_raw_file {
+    container 'stavisvols/psp_sipros_mono:latest'
+    label 'small'
+
+    input:
+    tuple path(psms), path(raw_file), val(label_elm), val(label_integer), path(config)
+
+    input:
+    tuple path(psms), path('*.mzML'), val(label_elm), val(label_integer), path(config)
+
+    script:
+    """
+    if [[ ( $raw_file == *.raw ) || ( $raw_file == *.RAW ) ]]
+    then
+        mono /software/ThermoRawFileParser.exe -i $raw_file -o ./
+    fi
+    """
+}
 
 process parse_mzml_files {
     container 'stavisvols/psp_isopacketmodeler:latest'
@@ -157,7 +175,8 @@ workflow isopacketModeler {
     samples //tuple(rows, PSMs)
 
     main:
-    peptides = samples.map {row, psms -> tuple(psms, file(row.mzml), row.label_elm, row.label_integer, file(row.config))}
+    peptides = samples.map {row, psms -> tuple(psms, file(row.raw_file), row.label_elm, row.label_integer, file(row.config))}
+        | convert_raw_file
         | parse_mzml_files
         | collect(flat:false)
        	| map {data -> tuple(data[0][0..6] + [data.collect {f -> f[7]}])}

@@ -51,7 +51,6 @@ This file specifies sample level information needed by the pipeline. It is a tab
 
  - `sample_ID` A sample identifier. It should not include spaces and must be globally unique within the run.
  - `raw_file` The thermo .raw filename for the sample. Only thermo .raw files are currently supported by Sipros.
- - `mzml` The .mzML version of the file for the sample. Currently you must convert the .raw file separately.
  - `label_elm` The element that was used for isotopic labeling. Only one element is supported. Options are C, H, N, O, P, and S. Deuterium labeling (H) is supported but not advised, see [footnote 3](#deuterium-labeling). Leave this blank for unlabeled control samples, see [footnote 4](#unlabeled-controls). 
  - `label_integer` The mass number of the label isotope, e.g. 13 for ^13^C.  Leave this blank for unlabeled control samples. 
  - `config` The `config.cfg` file name to use for the sample. This file's name is not constrained.
