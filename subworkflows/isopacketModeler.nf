@@ -22,7 +22,7 @@ process convert_raw_file {
     input:
     tuple path(psms), path(raw_file), val(label_elm), val(label_integer), path(config)
 
-    input:
+    output:
     tuple path(psms), path('*.mzML'), val(label_elm), val(label_integer), path(config)
 
     script:
