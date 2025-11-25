@@ -16,7 +16,7 @@ or
 
 ### Nextflow:
 To install Nextflow using conda:
-run `conda env create -n nextflow_env -c conda-forge nextflow`
+run `conda env create -n nextflow_env -c bioconda nextflow=25.10.0`
 If you wish to install nextflow without using conda please follow the installation instructions provided with the [nextflow documentation](https://www.nextflow.io/docs/latest/install.html). The example analysis and usage instructions will assume that conda was used for installation if not replace `conda run -n nextflow_env nextflow` with just `nextflow` in the example commands. 
 
 ### The container runtime:
