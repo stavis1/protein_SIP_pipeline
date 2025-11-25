@@ -2,7 +2,7 @@
 This is a Nextflow pipline that runs [Sipros4](https://github.com/thepanlab/Sipros4) and [IsopacketModeler](https://github.com/stavis1/isopacketModeler) to analyze protein stable isotope probing (SIP) data. 
 
 ## Installation
-It is strongly recommended that this pipeline be run on high performance computing (HPC) resources as both component tools are substantially more resource intensive than standard proteomics pipelines. The provided example `nextflow.config` file is set up to work with the SLURM scheduler. See [footnote 1](requirements) for more information.
+It is strongly recommended that this pipeline be run on high performance computing (HPC) resources as both component tools are substantially more resource intensive than standard proteomics pipelines. The provided example `nextflow.config` file is set up to work with the SLURM scheduler. See [footnote 1](#requirements) for more information.
 
 Installing protein_SIP_pipeline requires three components: a copy of this Git repo, a working Nextflow installation, and a container runtime such as Apptainer or Docker.
 
