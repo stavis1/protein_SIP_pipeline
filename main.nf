@@ -1,3 +1,5 @@
+nextflow.enable.dsl=2
+
 include { sipros } from './subworkflows/sipros'
 include { isopacketModeler } from './subworkflows/isopacketModeler'
 include { sipros_to_ipm } from './subworkflows/isopacketModeler'
