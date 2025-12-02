@@ -16,7 +16,7 @@ process sipros_psm_converter {
 }
 
 process convert_raw_file {
-    container 'quay.io/biocontainers/thermorawfileparser:1.1.11--0'
+    container 'stavisvols/psp_sipros_mono:latest'
     label 'small'
     stageInMode 'link'
 
@@ -30,7 +30,8 @@ process convert_raw_file {
     """
     if [[ ( $raw_file == *.raw ) || ( $raw_file == *.RAW ) ]]
     then
-        mono /usr/local/bin/ThermoRawFileParser.exe -i $raw_file -o ./ -f 2
+        (timeout 10m mono /software/ThermoRawFileParser.exe -i $raw_file -o ./ -f 2; exit 0)
+        ls *.mzML
     fi
     """
 }
