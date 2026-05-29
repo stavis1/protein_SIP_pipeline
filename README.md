@@ -16,7 +16,7 @@ or
 
 ### Nextflow:
 To install Nextflow using conda:
-run `conda env create -n nextflow_env -c bioconda nextflow=25.10.0`
+run `conda env create -n nextflow_env -c bioconda nextflow=25.10.2`
 If you wish to install nextflow without using conda please follow the installation instructions provided with the [nextflow documentation](https://www.nextflow.io/docs/latest/install.html). The example analysis and usage instructions will assume that conda was used for installation if not replace `conda run -n nextflow_env nextflow` with just `nextflow` in the example commands. 
 
 ### The container runtime:
@@ -36,7 +36,9 @@ Installing and configuring your own container runtime is outside of the scope of
 This pipeline uses a command line interface. Three configuration files are required to run the pipeline: `nextflow.config`, `config.cfg` and `design.tsv`. Templates for each of these files can be found in the `configs` directory. You will also need a Thermo .raw file, a converted .mzML file for each sample and a .fasta file database of protein sequences to search for.
 
 To run the pipeline run:
-`conda run -n nextflow_env nextflow -C nextflow.config /path/to/protein_SIP_pipeline/main.nf --design design.tsv --results_dir results/ -resume -with-report results/report.html`
+`conda run -n nextflow_env nextflow -C nextflow.config run /path/to/protein_SIP_pipeline/main.nf --design design.tsv --results_dir results/ -resume -with-report results/report.html`
+
+This command will run for the duration of the pipeline and therefore should not be run on the head node of your HPC. Instead, it should be submitted as its own job to the scheduler. I have found that 4 cores and 10g of RAM are sufficient. The total runtime of the pipeline may be longer than the maximum job time on your HPC. If this job times out, the `-resume` parameter allows nextflow to pick up where it left off when the job is re-submitted. 
 
 ### `nextflow.config`
 This file should be set up once per HPC installation. It controls how Nextflow interacts with the HPC job scheduler and container runtime. It also controls the resources allocated to each job. The following instructions assume that your HPC uses SLURM and Apptainer. If not, please consult the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) to determine how to modify this file for your use case. You will need to know several pieces of information about your HPC environment and account, please consult your HPC's documentation or your system administrator to find these.
