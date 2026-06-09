@@ -18,4 +18,15 @@ for dillfile in dillfiles:
 with open('peptides.dill', 'wb') as dillhandle:
     dill.dump(peptides, dillhandle)
 
-pd.concat([pd.read_csv(f, sep = '\t') for f in os.listdir() if f.endswith('.tsv')]).to_csv('peptides.tsv', sep = '\t', index = False)
+def read_tables(file):
+    try:
+        pd.read_csv(file, sep = '\t')
+    except pd.errors.EmptyDataError:
+        return None
+tables = [read_tables(f) for f in os.listdir() if f.endswith('.tsv')]
+tables = [t for t in tables if t is not None]
+if tables:
+    pd.concat(tables).to_csv('peptides.tsv', sep = '\t', index = False)
+else:
+    print('No valid enriched peptides found.')
+    exit(1)
