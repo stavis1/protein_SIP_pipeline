@@ -22,8 +22,8 @@ If you wish to install nextflow without using conda please follow the installati
 ### The container runtime:
 The HPC environment that you use is likely to come with a preinstalled container runtime. For academic clusters this is likely to be Apptainer/Singularity.  The provided `nextflow.config` file assumes that Apptainer is the installed runtime. If not, then simply replace `apptainer` with the name of the installed runtime. Please talk to your HPC system administrator if you do not know if or which runtime is installed. 
 
-You will need to be able to pull images from dockerhub on your HPC. Assuming you have access to Apptainer, try running the command `apptainer pull hello.sif docker://hello-world:latest` then checking that `hello.sif` has been created to test this ability. If you do not have this ability then follow these instructions: 
-1. Download the git repo to a machine that does have this ability.
+You will need to be able to pull images from dockerhub on your HPC. Assuming you have access to Apptainer, try running the command `apptainer pull hello.sif docker://hello-world:latest` then checking that `hello.sif` has been created to test this ability. If `hello.sif` was successfully created then the necessary container images will be created automatically during pipeline execution. If `hello.sif` was not created then follow these instructions: 
+1. Download the git repo to a machine that can build apptainer images.
 2. Navigate to the `cache` directory.
 3. Run the `build_apptainer.sh` script.
 4. Upload the `.img` files that were created to the `cache` directory in the git repo on your HPC
@@ -53,10 +53,13 @@ This file specifies sample level information needed by the pipeline. It is a tab
  - `sample_ID` A sample identifier. It should not include spaces and must be globally unique within the run.
  - `raw_file` The thermo .raw filename for the sample. Only thermo .raw files are currently supported by Sipros.
  - `label_elm` The element that was used for isotopic labeling. Only one element is supported. Options are C, H, N, O, P, and S. Deuterium labeling (H) is supported but not advised, see [footnote 3](#deuterium-labeling). Leave this blank for unlabeled control samples, see [footnote 4](#unlabeled-controls). 
- - `label_integer` The mass number of the label isotope, e.g. 13 for ^13^C.  Leave this blank for unlabeled control samples. 
+ - `label_integer` The mass number of the label isotope, e.g. 13 for <sup>13</sup>C.  Leave this blank for unlabeled control samples. 
  - `config` The `config.cfg` file name to use for the sample. This file's name is not constrained.
- - `sipros_reduce` By default Sipros runs 100 database searches per file, one for each atom percent label incorporation from background to 100%. To run only the Nth search job set this value to N, e.g. to run only every other search set this to 2. 
+ - `sipros_reduce` By default Sipros runs 101 database searches per file, one for each atom percent label incorporation from background to 100%. To run only every Nth search job set this value to N, e.g. to run only every other search set this to 2. 
  - `fasta` The fasta database to use for searching. 
+
+If you are running `isopacketModelerOnly.nf` instead of the full pipeline an extra column is necessary:
+ - `psms` The tab separated table of peptide spectrum matches for IsoPacketModeler to analyze. This should have columns for the peptide sequence, raw filename, PSM scan number, peptide charge, and protein IDs. These columns can be in any order and with any names; these names are to be specified in the config file.
 
 ### `config.cfg`
 This file controls the settings for both Sipros and IsopacketModeler. Please consult the relevant documentation for each tool for detailed instructions regarding parameter settings. You will need at least one of these files for each run. If you wish to use different settings for different samples in the same run then one file will need to be made for each combination of settings. The most common use case for this feature is to enable searching different isotopic labels in the same run. 
