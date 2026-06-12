@@ -25,7 +25,7 @@ process config_generator {
 
 process convert_raw_file {
     container 'stavisvols/psp_sipros_mono:latest'
-    label 'med'
+    label 'medium'
 
     input:
     tuple val(row), path(rawfile)
@@ -59,7 +59,7 @@ process search {
 
 process psm_filter {
     container 'stavisvols/psp_percolator:latest'
-    label 'med'
+    label 'percolator'
 
     input:
     tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)

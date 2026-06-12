@@ -38,7 +38,7 @@ process convert_raw_file {
 
 process parse_mzml_files {
     container 'stavisvols/psp_isopacketmodeler:latest'
-    label 'med'
+    label 'medium'
 
     input:
     tuple path(psms), path(mzml), val(label_elm), val(label_integer), path(config)
@@ -79,7 +79,7 @@ process parse_mzml_files {
 
 process classifier {
     container 'stavisvols/psp_isopacketmodeler:latest'
-    label 'huge'
+    label 'classifier'
 
     input:
     tuple path(psms), path(mzml), path(amino_acids), val(label_elm), val(label_integer), path(config), path(design_file), path(checkpoints)
