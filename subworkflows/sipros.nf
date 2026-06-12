@@ -59,7 +59,7 @@ process search {
 
 process psm_filter {
     container 'stavisvols/psp_percolator:latest'
-    label 'medium'
+    label 'med'
 
     input:
     tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
