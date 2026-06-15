@@ -79,61 +79,31 @@ process protein_filter {
 
     input:
     tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
-
-    output:
-    tuple val(sample_ID), path(config_file), path('*.txt'), path(fasta)
-
-    script:
-    """
-    python /software/Sipros4/V4Scripts/sipros_peptides_assembling.py -c $config_file -w ./
-    """
-}
-
-process abundance_cluster {
-    container 'stavisvols/psp_sipros_python:latest'
-    label 'small'
-
-    input:
-    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
-
+    
     output:
     tuple val(sample_ID), path('*.txt'), path(fasta)
 
     script:
     """
+    python /software/Sipros4/V4Scripts/sipros_peptides_assembling.py -c $config_file -w ./
     python /software/Sipros4/V4Scripts/ClusterSip.py -c $config_file -w ./
-    """
-}
-
-process protein_FDR {
-    container 'stavisvols/psp_sipros_r:latest'
-    label 'small'
-
-    input:
-    tuple path(sipfiles), path(fasta), val(row)
-
-    output:
-    tuple path('*.txt'), path(fasta), val(row)
-
-    script:
-    """
-    Rscript /software/Sipros4/V4Scripts/refineProteinFDR.R -pro *.pro.txt -psm *.psm.txt -fdr 0.01 -o $row.sample_ID
     """
 }
 
 process sip_abundance {
     container 'stavisvols/psp_sipros_r:latest'
     publishDir path: "${params.results_dir}/${row.sample_ID}", mode: 'copy', pattern: "*.txt"
-    label 'med'
+    label 'medium'
 
     input:
-    tuple path(sipfiles), path(fasta), val(row)
+    tuple path(txtfiles), path(fasta), val(row)
 
     output:
-    tuple val(row), path('*.txt') 
+    tuple val(row), path(txtfiles), path('*.txt') 
 
     script:
     """
+    Rscript /software/Sipros4/V4Scripts/refineProteinFDR.R -pro *.pro.txt -psm *.psm.txt -fdr 0.01 -o $row.sample_ID
     Rscript /software/Sipros4/V4Scripts/getLabelPCTinEachFT.R -pro *.proRefineFDR.txt -psm *.psm.txt -thr 3 -o $row.sample_ID
     """
 }
