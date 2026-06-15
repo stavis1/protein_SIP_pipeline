@@ -78,10 +78,10 @@ process protein_filter {
     label 'small'
 
     input:
-    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
+    tuple val(sample_ID), path(config_file), path(psmfiles), path(fasta)
     
     output:
-    tuple val(sample_ID), path('*.txt'), path(fasta)
+    tuple val(sample_ID), path(psmfiles), path('*.txt'), path(fasta)
 
     script:
     """
@@ -96,10 +96,10 @@ process sip_abundance {
     label 'medium'
 
     input:
-    tuple path(txtfiles), path(fasta), val(row)
+    tuple path(psmfiles), path(txtfiles), path(fasta), val(row)
 
     output:
-    tuple val(row), path(txtfiles), path('*.txt') 
+    tuple val(row), path(psmfiles), path(txtfiles), path('*.txt') 
 
     script:
     """
@@ -143,7 +143,7 @@ workflow sipros {
         | psm_filter
         | protein_filter
         | cross(indexed_rows)
-        | map {abund, row -> tuple(abund[1], abund[2], row[1])}
+        | map {abund, row -> tuple(abund[1], abund[2], abund[3], row[1])}
         | sip_abundance
 
     emit:
