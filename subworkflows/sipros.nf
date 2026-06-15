@@ -142,10 +142,8 @@ workflow sipros {
         //post-processing
         | psm_filter
         | protein_filter
-        | abundance_cluster
         | cross(indexed_rows)
         | map {abund, row -> tuple(abund[1], abund[2], row[1])}
-        | protein_FDR
         | sip_abundance
 
     emit:
