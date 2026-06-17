@@ -116,7 +116,7 @@ good_ids = set(results['PSMId'])
 data = read_data()
 data = data[[i in good_ids for i in data['SpecId']]]
 if data.shape[0] == 0:
-    exit(1234)
+    exit(64)
 data['DeltaP'] = [np.nan]*data.shape[0]
 data['MassErrorPPM'] = data['MassErrorDa'] * (data['CalculatedParentMass']/1e6)
 data['ProteinCount'] = [len(p.split(',')) for p in data['ProteinNames']]
