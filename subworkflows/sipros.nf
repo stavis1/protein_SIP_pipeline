@@ -36,7 +36,15 @@ process convert_raw_file {
     script:
     //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
     """
-    mono /software/Sipros4/bin/Raxport.exe -i ./ -o ./ -j 3
+    if [[ ( $rawfile == *.raw ) || ( $rawfile == *.RAW ) ]]
+    then
+        mono /software/Sipros4/bin/Raxport.exe -i ./ -o ./ -j 3
+    else
+    if [[ ( $rawfile == *.zip ) ]]
+    then
+        unzip $rawfile
+    fi
+    fi
     """
 }
 

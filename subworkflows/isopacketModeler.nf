@@ -32,6 +32,11 @@ process convert_raw_file {
     then
         (timeout 10m mono /software/ThermoRawFileParser.exe -i $raw_file -o ./ -f 2; exit 0)
         ls *.mzML
+        else
+    if [[ ( $rawfile == *.zip ) ]]
+    then
+        unzip $rawfile
+    fi
     fi
     """
 }
