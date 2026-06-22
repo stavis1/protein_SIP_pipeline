@@ -97,12 +97,21 @@ data = data[['SpecId', 'Label', 'ScanNr']+pred_cols+['Peptide', 'Proteins']]
 
 #run percolator on PSMs
 data.to_csv('sipros.pin', sep = '\t', index = False)
+N_psms = data.shape[0]
 del data
 
+subset_frac = 0 if N_psms < 1e6 else 1e6/N_psms
 init_tr = parser['Percolator']['train-fdr-initial']
 tr = parser['Percolator']['trainFDR']
 te = parser['Percolator']['testFDR']
-subprocess.run(f'percolator -U --train-fdr-initial {init_tr} --trainFDR {tr} --testFDR {te} -m sipros.pout sipros.pin',
+subprocess.run(' '.join(['percolator',
+                         '-U',
+                         f'--train-fdr-initial {init_tr}',
+                         f'--trainFDR {tr}',
+                         f'--testFDR {te}',
+                         '-m sipros.pout', 
+                         f'--subset-max-train {subset_frac}',
+                         'sipros.pin']),
                shell = True)
 results = pd.read_csv('sipros.pout', sep = '\t')
 
