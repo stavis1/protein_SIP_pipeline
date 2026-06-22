@@ -34,11 +34,10 @@ process convert_raw_file {
     tuple val(row.sample_ID), path('*.FT{1,2}')
 
     script:
-    //figure out how you want to determine the number of allocated cores then pass that to Raxport with the -j flag
     """
     if [[ ( $rawfile == *.raw ) || ( $rawfile == *.RAW ) ]]
     then
-        mono /software/Sipros4/bin/Raxport.exe -i ./ -o ./ -j 3
+        mono /software/Sipros4/bin/Raxport.exe -i ./ -o ./ -j $task.cpus
     else
     if [[ ( $rawfile == *.zip ) ]]
     then
