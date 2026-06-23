@@ -100,7 +100,7 @@ data.to_csv('sipros.pin', sep = '\t', index = False)
 N_psms = data.shape[0]
 del data
 
-subset_frac = 0 if N_psms < 1e6 else 1e6/N_psms
+subset_frac = 0 if N_psms < 1e6 else int(1e6)
 init_tr = parser['Percolator']['train-fdr-initial']
 tr = parser['Percolator']['trainFDR']
 te = parser['Percolator']['testFDR']
