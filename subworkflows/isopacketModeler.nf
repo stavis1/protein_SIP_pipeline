@@ -21,16 +21,16 @@ process convert_raw_file {
     stageInMode 'link'
 
     input:
-    tuple path(psms), path(raw_file), val(label_elm), val(label_integer), path(config)
+    tuple path(psms), path(rawfile), val(label_elm), val(label_integer), path(config)
 
     output:
     tuple path(psms), path('*.mzML'), val(label_elm), val(label_integer), path(config)
 
     script:
     """
-    if [[ ( $raw_file == *.raw ) || ( $raw_file == *.RAW ) ]]
+    if [[ ( $rawfile == *.raw ) || ( $rawfile == *.RAW ) ]]
     then
-        (timeout 10m mono /software/ThermoRawFileParser.exe -i $raw_file -o ./ -f 2; exit 0)
+        (timeout 10m mono /software/ThermoRawFileParser.exe -i $rawfile -o ./ -f 2; exit 0)
         ls *.mzML
         else
     if [[ ( $rawfile == *.zip ) ]]
