@@ -134,7 +134,7 @@ workflow sipros {
         //post-processing
         | protein_filter
         | cross(indexed_rows)
-        | map {abund, row -> tuple(abund[1], abund[2], abund[3], row[1])}
+        | map {abund, row -> tuple(abund[1], abund[2], row[1])}
         | sip_abundance
 
     emit:
