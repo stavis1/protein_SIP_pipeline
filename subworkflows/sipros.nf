@@ -64,34 +64,19 @@ process search {
     """
 }
 
-process psm_filter {
-    container 'stavisvols/psp_percolator:latest'
-    label 'percolator'
-
-    input:
-    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
-
-    output:
-    tuple val(sample_ID), path(config_file), path('*.txt'), path(fasta)
-
-    script:
-    """
-    python /software/percolator.py $config_file
-    """
-}
-
 process protein_filter {
     container 'stavisvols/psp_sipros_python:latest'
     label 'small'
 
     input:
-    tuple val(sample_ID), path(config_file), path(psmfiles), path(fasta)
+    tuple val(sample_ID), path(config_file), path(sipfiles), path(fasta)
     
     output:
-    tuple val(sample_ID), path(psmfiles), path('*.txt'), path(fasta)
+    tuple val(sample_ID), path('*.txt'), path(fasta)
 
     script:
     """
+    python /software/Sipros4/V4Scripts/sipros_peptides_filtering.py -c $config_file -w ./
     python /software/Sipros4/V4Scripts/sipros_peptides_assembling.py -c $config_file -w ./
     python /software/Sipros4/V4Scripts/ClusterSip.py -c $config_file -w ./
     """
@@ -103,10 +88,10 @@ process sip_abundance {
     label 'medium'
 
     input:
-    tuple path(psmfiles), path(txtfiles), path(fasta), val(row)
+    tuple path(txtfiles), path(fasta), val(row)
 
     output:
-    tuple val(row), path(psmfiles), path(txtfiles), path('*.txt') 
+    tuple val(row), path(txtfiles), path('*.txt') 
 
     script:
     """
@@ -147,7 +132,6 @@ workflow sipros {
         | groupTuple(size: 101, remainder: true)
         | map {key, sips, configs, fastas -> tuple(key, configs[0], sips, fastas[0])}
         //post-processing
-        | psm_filter
         | protein_filter
         | cross(indexed_rows)
         | map {abund, row -> tuple(abund[1], abund[2], abund[3], row[1])}
